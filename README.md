@@ -64,6 +64,8 @@ So we'd kindly ask that this project not be used to fabricate results, to genera
 > **学术应当保持纯粹。** Agent 可以替你跑实验，但 idea、判断与责任，请留给人来承担。我们真心希望每一位使用者都能 **human in the loop 地去思考**，把这个工具省下来的时间，投入到真正属于你自己的研究方向里。
 >
 > **科学は純粋であるべきです。** Agent は実験を走らせることができますが、アイデア・解釈・責任は、どうか人間の手に残してください。
+>
+> **과학은 순수해야 합니다.** Agent는 실험을 대신 실행해 줄 수 있지만, 아이디어와 해석, 그리고 책임은 부디 사람의 몫으로 남겨주세요.
 
 We trust the people who pick up this tool to take that seriously — and we built it because we believe most of you already do. Thank you for being one of them. 💛
 
