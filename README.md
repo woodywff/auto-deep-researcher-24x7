@@ -995,7 +995,22 @@ Or cite the software release:
 
 ## Star History
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Xiangyue-Zhang/auto-deep-researcher-24x7&type=Date)](https://www.star-history.com/#Xiangyue-Zhang/auto-deep-researcher-24x7&Date)
+<a href="https://www.star-history.com/#Xiangyue-Zhang/auto-deep-researcher-24x7&Date">
+  <picture>
+    <source
+      media="(prefers-color-scheme: dark)"
+      srcset="https://api.star-history.com/svg?repos=Xiangyue-Zhang/auto-deep-researcher-24x7&type=Date&theme=dark&v=20260408-1"
+    />
+    <source
+      media="(prefers-color-scheme: light)"
+      srcset="https://api.star-history.com/svg?repos=Xiangyue-Zhang/auto-deep-researcher-24x7&type=Date&v=20260408-1"
+    />
+    <img
+      alt="Star History Chart"
+      src="https://api.star-history.com/svg?repos=Xiangyue-Zhang/auto-deep-researcher-24x7&type=Date&v=20260408-1"
+    />
+  </picture>
+</a>
 
 ## License
 
