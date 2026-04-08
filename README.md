@@ -380,6 +380,62 @@ You'll see something like:
 # Experiment Status — my-first-experiment
 
 ## Goal
+
+## Human-in-the-Loop Playbook
+
+Use the agent as an operator, not a replacement researcher.
+
+```text
+Human decides:
+- goal
+- constraints
+- forbidden directions
+- when to pivot
+
+Agent executes:
+- code edits
+- runs
+- monitoring
+- summaries
+```
+
+Write stable rules in `PROJECT_BRIEF.md`, and temporary steering in `HUMAN_DIRECTIVE.md`.
+
+```md
+# HUMAN_DIRECTIVE.md
+- Do not change the dataset.
+- Try label smoothing 0.1 before changing the backbone.
+- Stop this direction if gain stays below 0.3 for 3 runs.
+- Compare against the last trusted baseline, not just the latest run.
+```
+
+Case 1: Safer ablation
+
+```md
+- Only change augmentation.
+- Keep model, optimizer, and training budget fixed.
+- Report a clean comparison table after each run.
+```
+
+Case 2: Deliberate pivot
+
+```md
+- Current ResNet line is saturated.
+- Switch to ViT-B/16 only if the last 3 runs plateau.
+- Before switching, write a short rationale.
+```
+
+Case 3: Suspicious result
+
+```md
+- Accuracy jumped unexpectedly.
+- Re-run with the same seed and one new seed.
+- Do not claim improvement until both runs reproduce.
+```
+
+Rule of thumb: let the agent handle repetition, but keep direction, interpretation, and responsibility human.
+
+---
 ResNet-50 on CIFAR-100 → 80%+ accuracy
 
 ## Progress
