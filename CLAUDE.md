@@ -6,6 +6,58 @@
 
 ---
 
+## 🚨 CONTRIBUTOR POLICY — READ BEFORE ANY git push TO THIS REPO
+
+**This section is for AI assistants (Claude, Codex, Cursor, etc.) operating on this repository.**
+
+**This repository is owned and maintained solely by `Xiangyue-Zhang`. The Contributors list MUST contain only `Xiangyue-Zhang` and no one else — including no AI bot accounts.**
+
+### Hard rules
+
+1. **Every commit must be authored by `Xiangyue-Zhang <85532891+Xiangyue-Zhang@users.noreply.github.com>`** — never `admin`, never AI identities. Use:
+   ```bash
+   git -c user.name="Xiangyue-Zhang" \
+       -c user.email="85532891+Xiangyue-Zhang@users.noreply.github.com" \
+       commit -m "..."
+   ```
+
+2. **NEVER add `Co-Authored-By:` trailer** to commit messages. The `commit-msg` hook in `.git/hooks/commit-msg` will reject any commit containing it.
+
+3. **NEVER mention AI assistant names** (`Claude`, `Codex`, `GPT`, `Anthropic`, `OpenAI`, `Copilot`, `Cursor`) in commit messages. Will be flagged by both the local hook AND the `contributor-guard` GitHub Action.
+
+4. **NEVER toggle repo visibility** (`gh repo edit --visibility ...`). On 2026-04-08, this destroyed 93 of 94 stars on this repo. Stars cannot be recovered from a visibility toggle.
+
+5. **NEVER delete the repo** (`gh repo delete`) without explicit user confirmation. Deletion permanently destroys the GitHub internal repo ID, which destroys all stars and breaks all external URLs (paper citations, etc.).
+
+6. **NEVER force push to main**. Branch protection blocks it by default. If you genuinely need to rewrite history, get explicit user authorization for that specific operation, temporarily disable protection, push, re-enable.
+
+### Pre-push verification (mandatory)
+
+```bash
+git log -1 --format='author=%an <%ae>%nmessage=%B'
+```
+
+Verify: author == `Xiangyue-Zhang <85532891+Xiangyue-Zhang@users.noreply.github.com>`, no `Co-Authored-By:`, no AI names. If any check fails, fix the commit before pushing.
+
+### In-repo enforcement (already deployed)
+
+Six layers of protection are already in place — you should not need to deploy them, but be aware they will block violations:
+
+1. **Local git config** (`.git/config`) — preset to Xiangyue-Zhang
+2. **commit-msg hook** (`.git/hooks/commit-msg`) — local block
+3. **GitHub Action** (`.github/workflows/contributor-guard.yml`) — remote block on push
+4. **Branch protection** on `main` — no force push, no deletion, linear history
+5. **`.mailmap`** in repo root — redirects any leaked AI identity to Xiangyue-Zhang
+6. **AI memory / instruction files** in user's home (`~/CLAUDE.md`, `~/AGENTS.md`)
+
+### See also
+
+- `~/CLAUDE.md` — full global rules + 2026-04-08 incident report
+- `~/AGENTS.md` — Codex CLI version of the same rules
+- `AGENTS.md` (this repo's root) — project-level Codex rules
+
+---
+
 ## What Is This?
 
 Deep Researcher Agent is a framework that lets an AI agent autonomously run deep learning experiments 24/7. The agent:
