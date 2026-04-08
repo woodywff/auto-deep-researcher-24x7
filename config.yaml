@@ -1,0 +1,40 @@
+# Deep Researcher Agent Configuration
+# See docs/architecture.md for detailed explanations
+
+project:
+  name: "my-research"
+  brief: "PROJECT_BRIEF.md"
+  workspace: "./workspace"
+
+agent:
+  # Provider: "anthropic" or "openai"
+  provider: "anthropic"
+
+  # Model selection per provider:
+  #   anthropic: claude-sonnet-4-6 (fast) | claude-opus-4-6 (strongest)
+  #   openai:    codex-5.3 (fast)         | gpt-5.4 (strongest)
+  model: "claude-sonnet-4-6"
+
+  max_cycles: -1                  # -1 = run forever
+  max_steps_per_cycle: 3          # Max worker dispatches per cycle
+  cooldown_interval: 300          # Smart cooldown polling interval (seconds)
+
+memory:
+  brief_max_chars: 3000           # Tier 1: PROJECT_BRIEF cap
+  log_max_chars: 2000             # Tier 2: MEMORY_LOG cap
+  milestone_max_chars: 1200       # Key results section cap
+  max_recent_entries: 15          # Rolling decision count
+
+gpu:
+  auto_detect: true               # Auto-detect available GPUs
+  reserve_last: true              # Reserve last GPU for keep-alive
+
+monitor:
+  poll_interval: 900              # Check every 15 min during training
+  zero_llm: true                  # No LLM calls during monitoring
+  notify_on_complete: true        # Log notification on experiment completion
+
+experiment:
+  mandatory_dry_run: true         # Always dry-run before real training
+  max_parallel: 1                 # Max concurrent experiments
+  log_tail_lines: 50              # Lines to capture from training log
