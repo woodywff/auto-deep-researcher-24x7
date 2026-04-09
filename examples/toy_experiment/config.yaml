@@ -4,7 +4,8 @@ project:
   brief: "PROJECT_BRIEF.md"
 
 agent:
-  model: "claude-sonnet-4-6"
+  provider: "dashscope"
+  model: "qwen3.6-plus"
   max_cycles: 3
   max_steps_per_cycle: 2
   cooldown_interval: 60

@@ -14,6 +14,18 @@ from typing import Optional
 
 logger = logging.getLogger("autoresearcher.tools")
 
+# Semantic Scholar Graph API: optional auth via https://www.semanticscholar.org/product/api
+S2_API_KEY_ENV = "S2_API_KEY"
+
+
+def _semantic_scholar_headers() -> dict[str, str]:
+    """Headers for api.semanticscholar.org; adds x-api-key when S2_API_KEY is set."""
+    headers: dict[str, str] = {"User-Agent": "AutoResearcher/1.0"}
+    key = os.getenv(S2_API_KEY_ENV, "").strip()
+    if key:
+        headers["x-api-key"] = key
+    return headers
+
 
 class ToolRegistry:
     """Manages tools available to agents.
@@ -261,7 +273,7 @@ class ToolRegistry:
         url = f"https://api.semanticscholar.org/graph/v1/paper/search?{urllib.parse.urlencode(params)}"
 
         try:
-            req = urllib.request.Request(url, headers={"User-Agent": "AutoResearcher/1.0"})
+            req = urllib.request.Request(url, headers=_semantic_scholar_headers())
             with urllib.request.urlopen(req, timeout=15) as resp:
                 data = json.loads(resp.read())
                 papers = data.get("data", [])

@@ -7,13 +7,17 @@ project:
   workspace: "./workspace"
 
 agent:
-  # Provider: "anthropic" or "openai"
-  provider: "anthropic"
+  # 默认：dashscope + qwen3.6-plus（需 DASHSCOPE_API_KEY）。备选：anthropic / openai
+  provider: "dashscope"
 
   # Model selection per provider:
-  #   anthropic: claude-sonnet-4-6 (fast) | claude-opus-4-6 (strongest)
-  #   openai:    codex-5.3 (fast)         | gpt-5.4 (strongest)
-  model: "claude-sonnet-4-6"
+  #   dashscope (默认): qwen3.6-plus；各地域 endpoint 可设 dashscope_base_url 或 DASHSCOPE_BASE_URL
+  #   anthropic:        claude-sonnet-4-6 (fast) | claude-opus-4-6 (strongest)
+  #   openai:           codex-5.3 (fast)         | gpt-5.4 (strongest)
+  model: "qwen3.6-plus"
+
+  # 可选：仅 provider 为 dashscope 时生效；不设则用默认北京兼容地址或环境变量 DASHSCOPE_BASE_URL
+  # dashscope_base_url: "https://dashscope.aliyuncs.com/compatible-mode/v1"
 
   max_cycles: -1                  # -1 = run forever
   max_steps_per_cycle: 3          # Max worker dispatches per cycle

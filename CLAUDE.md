@@ -98,26 +98,31 @@ Run these commands and report results to the user:
 ```bash
 python3 --version          # Need 3.10+
 nvidia-smi                 # Need at least 1 GPU
-echo $ANTHROPIC_API_KEY    # Need Anthropic key
-echo $OPENAI_API_KEY       # OR OpenAI key (either works)
+echo $DASHSCOPE_API_KEY    # Default: Alibaba DashScope (qwen3.6-plus)
+echo $ANTHROPIC_API_KEY    # Optional: Claude
+echo $OPENAI_API_KEY       # Optional: Codex/GPT
 ```
 
 If Python < 3.10: suggest `conda create -n dra python=3.11 -y && conda activate dra`
 
 If no GPU: this framework requires a GPU for training. Suggest cloud GPU (Lambda Labs, RunPod, Vast.ai).
 
-If no API key: guide them to:
+If no API key: guide them to (pick the provider you use in `config.yaml`):
+- DashScope (default): https://help.aliyun.com/zh/model-studio/get-api-key → set `DASHSCOPE_API_KEY`
 - Anthropic: https://console.anthropic.com/ → API Keys → Create Key
 - OpenAI: https://platform.openai.com/api-keys → Create new secret key
 
 Then set it:
 ```bash
-# Pick ONE:
-export ANTHROPIC_API_KEY="sk-ant-xxxxx"   # For Claude
-export OPENAI_API_KEY="sk-xxxxx"          # For Codex/GPT
+# Default path (DashScope / qwen3.6-plus):
+export DASHSCOPE_API_KEY="sk-xxxxx"
 
-# Make permanent:
-echo 'export ANTHROPIC_API_KEY="sk-ant-xxxxx"' >> ~/.bashrc
+# Alternatives — set only if you switch provider in config.yaml:
+export ANTHROPIC_API_KEY="sk-ant-xxxxx"
+export OPENAI_API_KEY="sk-xxxxx"
+
+# Make permanent (example):
+echo 'export DASHSCOPE_API_KEY="sk-xxxxx"' >> ~/.bashrc
 source ~/.bashrc
 ```
 
@@ -153,14 +158,22 @@ python -m core.loop --check
 
 ### Step 3: Choose Your LLM Provider
 
-Ask the user: "Do you want to use Claude (Anthropic) or Codex/GPT (OpenAI)?"
+Default in `config.yaml` is **DashScope** with **qwen3.6-plus** (`DASHSCOPE_API_KEY`). Alternatives: Anthropic (Claude) or OpenAI (Codex/GPT).
 
-| Provider | Fast Model | Strong Model | Env Var |
-|----------|-----------|-------------|---------|
-| Anthropic | claude-sonnet-4-6 | claude-opus-4-6 | ANTHROPIC_API_KEY |
-| OpenAI | codex-5.3 | gpt-5.4 | OPENAI_API_KEY |
+| Provider | Typical model | Env Var |
+|----------|----------------|---------|
+| DashScope (default) | qwen3.6-plus | DASHSCOPE_API_KEY |
+| Anthropic | claude-sonnet-4-6 / claude-opus-4-6 | ANTHROPIC_API_KEY |
+| OpenAI | codex-5.3 / gpt-5.4 | OPENAI_API_KEY |
 
-Default is Anthropic. To switch to OpenAI, edit `config.yaml`:
+To use Claude instead, edit `config.yaml`:
+```yaml
+agent:
+  provider: "anthropic"
+  model: "claude-sonnet-4-6"
+```
+
+To use OpenAI:
 ```yaml
 agent:
   provider: "openai"
@@ -399,8 +412,9 @@ pip install anthropic openai
 
 ### "API key not set"
 ```bash
+export DASHSCOPE_API_KEY="your-key-here"   # default provider
+# OR if using anthropic / openai in config.yaml:
 export ANTHROPIC_API_KEY="your-key-here"
-# OR
 export OPENAI_API_KEY="your-key-here"
 ```
 

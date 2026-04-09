@@ -59,7 +59,8 @@ Override default agent settings:
 
 ```yaml
 agent:
-  model: "claude-sonnet-4-6"
+  provider: "dashscope"   # default; use "anthropic" or "openai" as alternatives
+  model: "qwen3.6-plus"
   max_cycles: -1          # -1 = unlimited
   max_steps_per_cycle: 3  # max sub-agent dispatches per cycle
   cooldown_interval: 300  # 5 min smart polling

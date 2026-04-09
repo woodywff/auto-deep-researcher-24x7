@@ -10,8 +10,16 @@ Only ONE worker runs at a time. Others idle at zero token cost.
 
 import json
 import logging
+import os
 from pathlib import Path
 from typing import Optional
+
+# 阿里云百炼 OpenAI 兼容模式默认 endpoint（各地域可能不同，可用环境变量或 config 覆盖）
+DEFAULT_DASHSCOPE_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+DEFAULT_DASHSCOPE_MODEL = "qwen3.6-plus"
+# 项目默认 LLM（无 config 或缺字段时的回退）
+DEFAULT_AGENT_PROVIDER = "dashscope"
+DEFAULT_AGENT_MODEL = DEFAULT_DASHSCOPE_MODEL
 
 logger = logging.getLogger("autoresearcher.agents")
 
@@ -58,10 +66,25 @@ class AgentDispatcher:
         "gpt-5.4": "claude-opus-4-6",
     }
 
-    def __init__(self, model: str = "claude-sonnet-4-6", provider: str = "anthropic", max_steps: int = 3):
+    # 使用 DashScope 时，若 model 仍为其它厂商的占位名，则落到默认 Qwen 模型
+    DASHSCOPE_MODEL_ALIASES = {
+        "claude-sonnet-4-6": DEFAULT_DASHSCOPE_MODEL,
+        "claude-opus-4-6": DEFAULT_DASHSCOPE_MODEL,
+        "codex-5.3": DEFAULT_DASHSCOPE_MODEL,
+        "gpt-5.4": DEFAULT_DASHSCOPE_MODEL,
+    }
+
+    def __init__(
+        self,
+        model: str = DEFAULT_AGENT_MODEL,
+        provider: str = DEFAULT_AGENT_PROVIDER,
+        max_steps: int = 3,
+        dashscope_base_url: Optional[str] = None,
+    ):
         self.model = model
-        self.provider = provider  # "anthropic" or "openai"
+        self.provider = provider  # "anthropic" | "openai" | "dashscope"
         self.max_steps = max_steps
+        self.dashscope_base_url = dashscope_base_url
         self._leader_history = []
 
     def dispatch_leader(self, task: str, context: dict) -> dict:
@@ -134,16 +157,18 @@ class AgentDispatcher:
         self._leader_history = []
 
     def _call_llm(self, system: str, messages: list, tools: list = None, max_turns: int = 10) -> str:
-        """Call the LLM API. Supports both Anthropic (Claude) and OpenAI (Codex/GPT).
+        """Call the LLM API. Supports Anthropic, OpenAI, and DashScope (Qwen, OpenAI-compatible).
 
         Provider is determined by self.provider:
         - "anthropic": Uses Claude API with prompt caching
         - "openai": Uses OpenAI API (Codex 5.3 / GPT 5.4)
+        - "dashscope": Uses 阿里云百炼 compatible-mode + DASHSCOPE_API_KEY
         """
         if self.provider == "openai":
             return self._call_openai(system, messages)
-        else:
-            return self._call_anthropic(system, messages)
+        if self.provider == "dashscope":
+            return self._call_dashscope(system, messages)
+        return self._call_anthropic(system, messages)
 
     def _call_anthropic(self, system: str, messages: list) -> str:
         """Call Anthropic Claude API."""
@@ -201,6 +226,42 @@ class AgentDispatcher:
         except ImportError:
             logger.warning("openai package not installed. Using mock response.")
             return json.dumps({"action": "wait", "reason": "LLM not available"})
+
+    def _resolve_dashscope_model(self) -> str:
+        return self.DASHSCOPE_MODEL_ALIASES.get(self.model, self.model)
+
+    def _call_dashscope(self, system: str, messages: list) -> str:
+        """Call 阿里云百炼 OpenAI 兼容接口（如 qwen3.6-plus）。需要环境变量 DASHSCOPE_API_KEY。"""
+        try:
+            import openai
+        except ImportError:
+            logger.warning("openai package not installed. Using mock response.")
+            return json.dumps({"action": "wait", "reason": "LLM not available"})
+
+        api_key = os.getenv("DASHSCOPE_API_KEY")
+        if not api_key:
+            logger.warning("DASHSCOPE_API_KEY not set. Using mock response.")
+            return json.dumps({"action": "wait", "reason": "DASHSCOPE_API_KEY not set"})
+
+        base_url = (
+            self.dashscope_base_url
+            or os.getenv("DASHSCOPE_BASE_URL")
+            or DEFAULT_DASHSCOPE_BASE_URL
+        )
+        client = openai.OpenAI(api_key=api_key, base_url=base_url)
+        model = self._resolve_dashscope_model()
+
+        api_messages = [{"role": "system", "content": system}]
+        for msg in messages:
+            api_messages.append({"role": msg["role"], "content": msg["content"]})
+
+        response = client.chat.completions.create(
+            model=model,
+            max_tokens=4096,
+            messages=api_messages,
+        )
+        content = response.choices[0].message.content
+        return content if content is not None else ""
 
     def _load_prompt(self, filename: str) -> str:
         """Load agent prompt from agents/ directory."""

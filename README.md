@@ -58,7 +58,7 @@ Prefer AI-guided setup? Open [`AI_GUIDE.md`](AI_GUIDE.md) in Claude / ChatGPT / 
 |-------------|----------|-------|
 | Python 3.10+ | Yes | Runtime |
 | 1+ NVIDIA GPU | Yes | For training |
-| API key | Yes | Anthropic or OpenAI |
+| API key | Yes | DashScope (default) or Anthropic or OpenAI |
 | `PROJECT_BRIEF.md` | Yes | Main control file |
 | Project `config.yaml` | Optional | Only if you want to override defaults |
 | Obsidian vault | Optional | If absent, notes fall back to local text files |
@@ -343,13 +343,14 @@ Only ONE worker runs at a time. Others idle at zero cost.
 | Python 3.10+ | Runtime | `python3 --version` |
 | [Claude Code](https://claude.ai/claude-code) | The AI backbone | `claude --version` |
 | 1+ NVIDIA GPU | For training | `nvidia-smi` |
-| Anthropic API key | LLM calls | `echo $ANTHROPIC_API_KEY` |
+| DashScope API key (default) | LLM calls (`python -m core.loop`) | `echo $DASHSCOPE_API_KEY` |
 
-Don't have an API key? Get one at [console.anthropic.com](https://console.anthropic.com/) and set it:
+Don't have a key? For the default provider, get a [DashScope API key](https://help.aliyun.com/zh/model-studio/get-api-key) and set:
 ```bash
-export ANTHROPIC_API_KEY="sk-ant-xxxxx"
+export DASHSCOPE_API_KEY="sk-xxxxx"
 # Add to ~/.bashrc or ~/.zshrc to make it permanent
 ```
+For Anthropic or OpenAI instead, set `ANTHROPIC_API_KEY` or `OPENAI_API_KEY` and change `agent.provider` in `config.yaml`.
 
 ### Step 1: Install
 
@@ -843,26 +844,27 @@ python install.py --uninstall
 
 ## Supported LLM Providers
 
-Works with **both Anthropic and OpenAI** out of the box. Pick your provider:
+**Default:** Alibaba DashScope (**qwen3.6-plus**) via OpenAI-compatible API. **Alternatives:** Anthropic (Claude) or OpenAI (Codex/GPT).
 
-| Tier | Anthropic (Claude) | OpenAI (Codex/GPT) | Best For |
-|------|-------------------|-------------------|----------|
-| **Fast** | `claude-sonnet-4-6` | `codex-5.3` | Daily experiments, iteration |
-| **Strongest** | `claude-opus-4-6` | `gpt-5.4` | Complex reasoning, architecture decisions |
+| Tier | DashScope (default) | Anthropic (Claude) | OpenAI (Codex/GPT) | Best For |
+|------|---------------------|-------------------|-------------------|----------|
+| **Fast / default** | `qwen3.6-plus` | `claude-sonnet-4-6` | `codex-5.3` | Daily experiments, iteration |
+| **Strongest** | (see model studio) | `claude-opus-4-6` | `gpt-5.4` | Complex reasoning, architecture decisions |
 
-Switch provider in `config.yaml`:
+Default `config.yaml` uses DashScope. Switch provider in `config.yaml`:
 ```yaml
 agent:
-  provider: "openai"       # or "anthropic"
-  model: "codex-5.3"       # or "claude-sonnet-4-6"
+  provider: "anthropic"    # or "openai" or "dashscope"
+  model: "claude-sonnet-4-6"
 ```
 
 Or set via environment:
 ```bash
-# For Anthropic
-export ANTHROPIC_API_KEY="sk-ant-xxxxx"
+# Default path (DashScope)
+export DASHSCOPE_API_KEY="sk-xxxxx"
 
-# For OpenAI
+# Alternatives
+export ANTHROPIC_API_KEY="sk-ant-xxxxx"
 export OPENAI_API_KEY="sk-xxxxx"
 ```
 
@@ -877,8 +879,8 @@ project:
   brief: "PROJECT_BRIEF.md"
 
 agent:
-  provider: "anthropic"           # "anthropic" or "openai"
-  model: "claude-sonnet-4-6"      # See model table above
+  provider: "dashscope"           # "dashscope" (default) | "anthropic" | "openai"
+  model: "qwen3.6-plus"           # See Supported LLM Providers above
   max_cycles: -1                  # -1 = run forever
   max_steps_per_cycle: 3          # Max worker dispatches per cycle
   cooldown_interval: 300          # Smart cooldown polling (seconds)

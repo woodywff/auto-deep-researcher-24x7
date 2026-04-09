@@ -16,7 +16,7 @@ from typing import Optional
 
 from .memory import MemoryManager
 from .monitor import ExperimentMonitor
-from .agents import AgentDispatcher
+from .agents import AgentDispatcher, DEFAULT_AGENT_MODEL, DEFAULT_AGENT_PROVIDER
 from .obsidian import ObsidianExporter
 from .tools import ToolRegistry
 
@@ -51,10 +51,12 @@ class ResearchLoop:
             poll_interval=config.get("monitor", {}).get("poll_interval", 900),
             zero_llm=config.get("monitor", {}).get("zero_llm", True),
         )
+        agent_cfg = config.get("agent", {})
         self.dispatcher = AgentDispatcher(
-            model=config.get("agent", {}).get("model", "claude-sonnet-4-6"),
-            provider=config.get("agent", {}).get("provider", "anthropic"),
-            max_steps=config.get("agent", {}).get("max_steps_per_cycle", 3),
+            model=agent_cfg.get("model", DEFAULT_AGENT_MODEL),
+            provider=agent_cfg.get("provider", DEFAULT_AGENT_PROVIDER),
+            max_steps=agent_cfg.get("max_steps_per_cycle", 3),
+            dashscope_base_url=agent_cfg.get("dashscope_base_url"),
         )
         self.tools = ToolRegistry(self.workspace)
         self.obsidian = ObsidianExporter(config=config, project_dir=self.project_dir)
